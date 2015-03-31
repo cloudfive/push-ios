@@ -6,4 +6,4 @@
 //  Copyright (c) 2014 Brian Samson. All rights reserved.
 //
 
-${TEST_EXAMPLE}
+

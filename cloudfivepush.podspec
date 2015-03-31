@@ -8,28 +8,28 @@
 #
 
 Pod::Spec.new do |s|
-  s.name             = "cloudfivepush"
+  s.name             = "CloudFivePush"
   s.version          = "0.1.0"
-  s.summary          = "A short description of cloudfivepush."
+  s.summary          = "iOS client library for receiving push notifications from cloudfiveapp.com."
   s.description      = <<-DESC
                        An optional longer description of cloudfivepush
 
                        * Markdown format.
                        * Don't worry about the indent, we strip it!
                        DESC
-  s.homepage         = "https://github.com/<GITHUB_USERNAME>/cloudfivepush"
+  s.homepage         = "https://github.com/cloudfive/push-ios"
   # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
   s.license          = 'MIT'
-  s.author           = { "Brian Samson" => "brian@briansamson.com" }
-  s.source           = { :git => "https://github.com/<GITHUB_USERNAME>/cloudfivepush.git", :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
+  s.author           = { "Brian Samson" => "brian@cloudfiveapp.com" }
+  s.source           = { :git => "https://github.com/cloudfive/push-ios", :tag => s.version.to_s }
+  # s.social_media_url = 'https://twitter.com/cloudfiveapp'
 
   s.platform     = :ios, '7.0'
   s.requires_arc = true
 
-  s.source_files = 'Pod/Classes/**/*'
+  s.source_files = 'CloudFivePush/Classes/**/*'
   s.resource_bundles = {
-    'cloudfivepush' => ['Pod/Assets/*.png']
+    'CloudFivePush' => ['CloudFivePush/Assets/*.png']
   }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'

@@ -1,0 +1,14 @@
+PODS:
+  - cloudfivepush (0.1.0)
+
+DEPENDENCIES:
+  - cloudfivepush (from `../`)
+
+EXTERNAL SOURCES:
+  cloudfivepush:
+    :path: ../
+
+SPEC CHECKSUMS:
+  cloudfivepush: d9c5588ec68223e1ce59b7db07e4ca5ae35aa330
+
+COCOAPODS: 0.36.1
