@@ -32,12 +32,10 @@
     return cfad;
 }
 
-//+ (void)load {
-//    static dispatch_once_t onceToken;
-//    dispatch_once(&onceToken, ^{
-//        
-//    });
-//}
++ (void)load {
+    //instantiate the singleton which will swizzle a bunch of AppDelegate methods
+    [CloudFiveAppDelegate sharedInstance];
+}
 
 // its dangerous to override a method from within a category.
 // Instead we will use method swizzling. we set this up in the load call.
@@ -47,7 +45,8 @@
    
     [self replaceSelector:@selector(application:didRegisterForRemoteNotificationsWithDeviceToken:)];
     [self replaceSelector:@selector(application:didFailToRegisterForRemoteNotificationsWithError:)];
-    [self replaceSelector:@selector(application:didReceiveRemoteNotification:fetchCompletionHandler:)];
+//    [self replaceSelector:@selector(application:didReceiveRemoteNotification:fetchCompletionHandler:)];
+    [self replaceSelector:@selector(application:didReceiveRemoteNotification:)];
     
     return self;
 }
@@ -97,7 +96,7 @@
     //    [self sendResult:@{@"event": @"registration", @"success": @NO, @"error": [error localizedDescription]} ];
 }
 
--(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))handler
+-(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
 {
     NSLog(@"didReceiveNotification");
     
