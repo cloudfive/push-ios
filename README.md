@@ -13,17 +13,17 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 
 ## Installation
 
-cloudfivepush is available through [CocoaPods](http://cocoapods.org). To install
+CloudFivePush is available through [CocoaPods](http://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
 ```ruby
-pod "cloudfivepush"
+pod "CloudFivePush"
 ```
 
 ## Author
 
-Brian Samson, brian@briansamson.com
+Brian Samson, @samsonasu
 
 ## License
 
-cloudfivepush is available under the MIT license. See the LICENSE file for more info.
+CloudFivePush is available under the MIT license. See the LICENSE file for more info.
