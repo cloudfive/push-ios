@@ -12,16 +12,14 @@ Pod::Spec.new do |s|
   s.version          = "0.1.0"
   s.summary          = "iOS client library for receiving push notifications from cloudfiveapp.com."
   s.description      = <<-DESC
-                       An optional longer description of cloudfivepush
-
-                       * Markdown format.
-                       * Don't worry about the indent, we strip it!
+                       Easy push notifications via https://push.cloudfiveapp.com.  Just include this Pod in your iOS
+                       project and sign up online to get started.
                        DESC
   s.homepage         = "https://github.com/cloudfive/push-ios"
   # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
   s.license          = 'MIT'
   s.author           = { "Brian Samson" => "brian@cloudfiveapp.com" }
-  s.source           = { :git => "https://github.com/cloudfive/push-ios", :tag => s.version.to_s }
+  s.source           = { :git => "https://github.com/cloudfive/push-ios.git", :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/cloudfiveapp'
 
   s.platform     = :ios, '7.0'
