@@ -11,8 +11,8 @@
 
 @interface CloudFivePush : NSObject <NSURLConnectionDataDelegate, UIAlertViewDelegate>
 +(void)configure;
-
-+(void)register:(NSString*)userIdentifier;
++(void)register;
++(void)registerWithUserIdentifier:(NSString*)userIdentifier;
 +(void)notifyCloudFiveWithToken:(NSString*)apsToken uniqueIdentifier:(NSString*)uniqueIdentifier;
 //-(void)didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)token;
 //-(void)didFailToRegisterForRemoteNotificationsWithError:(NSError *)error;

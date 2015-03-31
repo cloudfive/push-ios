@@ -1,4 +1,4 @@
-# cloudfivepush
+# Cloud Five Push for iOS
 
 [![CI Status](http://img.shields.io/travis/Brian Samson/cloudfivepush.svg?style=flat)](https://travis-ci.org/Brian Samson/cloudfivepush)
 [![Version](https://img.shields.io/cocoapods/v/cloudfivepush.svg?style=flat)](http://cocoapods.org/pods/cloudfivepush)
@@ -7,9 +7,26 @@
 
 ## Usage
 
-To run the example project, clone the repo, and run `pod install` from the Example directory first.
+After the application is initialized (i.e., in `applicationDidLaunch`), simple call `register`
+
+    //Register this device for push notifications
+
+    [CloudFivePush register];
+
+    // If you wish to send targeted notifications to specific users, simply pass in a
+    // unique user identifier:
+
+    [CloudFivePush registerWithUserIdentifier: @"user@example.com"];
+
+## Advanced Usage
+
+Coming soon.
 
 ## Requirements
+
+* iOS version must be at least 7
+
+* You will need an account on [Cloud Five](http://push.cloudfiveapp.com) in order to send push notifications to the device.
 
 ## Installation
 

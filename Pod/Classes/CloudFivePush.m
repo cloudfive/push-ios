@@ -22,7 +22,12 @@
     [CloudFiveAppDelegate sharedInstance];
 }
 
-+ (void)register:(NSString*)userIdentifier
++ (void)register
+{
+    [self registerWithUserIdentifier:nil];
+}
+
++ (void)registerWithUserIdentifier:(NSString *)userIdentifier
 {
     [[CloudFiveAppDelegate sharedInstance] register: userIdentifier];
 }
@@ -40,12 +45,12 @@
                           dev.model,
                           dev.systemVersion,
                           [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString*)kCFBundleVersionKey]
-                          
+
                           ];
     if (uniqueIdentifier != nil) {
         postData = [postData stringByAppendingFormat:@"&user_identifier=%@", uniqueIdentifier];
     }
-    
+
     request.HTTPBody = [postData dataUsingEncoding:NSUTF8StringEncoding];
     NSURLConnection *conn = [NSURLConnection connectionWithRequest:request delegate:self];
     [conn start];
