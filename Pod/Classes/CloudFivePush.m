@@ -13,11 +13,12 @@
 {
 
 }
+
 @end
 
 @implementation CloudFivePush;
 
-+(void)configure
++ (void)configure
 {
     [CloudFiveAppDelegate sharedInstance];
 }
@@ -32,8 +33,7 @@
     [[CloudFiveAppDelegate sharedInstance] register: userIdentifier];
 }
 
-
-+(void)notifyCloudFiveWithToken:(NSString*)apsToken uniqueIdentifier:(NSString*)uniqueIdentifier
++ (void)notifyCloudFiveWithToken:(NSString *)apsToken uniqueIdentifier:(NSString *)uniqueIdentifier
 {
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://www.cloudfiveapp.com/push/register"]];
     request.HTTPMethod = @"POST";
@@ -56,12 +56,12 @@
     [conn start];
 }
 
--(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
     NSLog(@"Error talking to cloudfive");
 }
 
--(void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response
 {
     NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
     if ([httpResponse statusCode] == 200) {
@@ -71,13 +71,4 @@
     }
 }
 
-// Accept self signed certificates
-//- (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace {
-//    return [protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust];
-//}
-//
-//- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-//    NSURLCredential *credential = [NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust];
-//    [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
-//}
 @end
