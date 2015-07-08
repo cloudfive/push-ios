@@ -22,7 +22,7 @@
 
 @implementation CloudFiveAppDelegate : NSObject
 
-+ (id) sharedInstance
++ (id)sharedInstance
 {
     static CloudFiveAppDelegate *cfad = nil;
     static dispatch_once_t onceToken;
@@ -32,7 +32,8 @@
     return cfad;
 }
 
-+ (void)load {
++ (void)load
+{
     //instantiate the singleton which will swizzle a bunch of AppDelegate methods
     [CloudFiveAppDelegate sharedInstance];
 }
@@ -45,14 +46,13 @@
    
     [self replaceSelector:@selector(application:didRegisterForRemoteNotificationsWithDeviceToken:)];
     [self replaceSelector:@selector(application:didFailToRegisterForRemoteNotificationsWithError:)];
-//    [self replaceSelector:@selector(application:didReceiveRemoteNotification:fetchCompletionHandler:)];
     [self replaceSelector:@selector(application:didReceiveRemoteNotification:)];
     
     return self;
 }
 
 // Replace a selector on AppDelegate with the same named selector here
-- (Method) replaceSelector:(SEL)selector
+- (Method)replaceSelector:(SEL)selector
 {
     Class appDelegate = NSClassFromString(@"AppDelegate");
     
@@ -74,7 +74,7 @@
     return originalMethod;
 }
 
--(void)noop
+- (void)noop
 {
     NSLog(@"NOOP");
 }
@@ -82,24 +82,21 @@
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
 {
     NSLog(@"Got token: %@", deviceToken);
-    NSString* apsToken = [[[[deviceToken description] stringByReplacingOccurrencesOfString:@"<"  withString:@""]
-                  stringByReplacingOccurrencesOfString:@">"  withString:@""]
-                 stringByReplacingOccurrencesOfString: @" " withString:@""];
-    [CloudFivePush notifyCloudFiveWithToken: apsToken uniqueIdentifier:@"test"];
+    NSString *apsToken = [[[[deviceToken description] stringByReplacingOccurrencesOfString:@"<" withString:@""]
+						   stringByReplacingOccurrencesOfString:@">"  withString:@""]
+						  stringByReplacingOccurrencesOfString:@" " withString:@""];
+    [CloudFivePush notifyCloudFiveWithToken:apsToken uniqueIdentifier:@"test"];
     
     [[CloudFiveAppDelegate sharedInstance] application:application didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
 }
 
--(void)application:(UIApplication*)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
 {
-    NSLog(@"Error registering for push");
-    //    [self sendResult:@{@"event": @"registration", @"success": @NO, @"error": [error localizedDescription]} ];
+    NSLog(@"Error registering for push: %@", [error localizedDescription]);
 }
 
--(void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
 {
-    NSLog(@"didReceiveNotification");
-    
     // Get application state for iOS4.x+ devices, otherwise assume active
     UIApplicationState appState = UIApplicationStateActive;
     if ([application respondsToSelector:@selector(applicationState)]) {
@@ -116,17 +113,13 @@
     if (appState == UIApplicationStateActive) {
         // This method is swizzled so self is AppDelegate
         [[CloudFiveAppDelegate sharedInstance] handleForegroundNotification:userInfo];
-    } else {
-        //save it for later
-        //[self handleBackgroundNotification:userInfo];
     }
-    //TODO call original method if present
-    
+	
+	[[CloudFiveAppDelegate sharedInstance] application:application didReceiveRemoteNotification:userInfo];
 }
 
--(void)handleForegroundNotification:(NSDictionary *)userInfo
+- (void)handleForegroundNotification:(NSDictionary *)userInfo
 {
-    
     NSDictionary *payload = [userInfo objectForKey:@"aps"];
     NSString *message = [userInfo objectForKey:@"message"];
     NSString *alert = [payload objectForKey:@"alert"];
@@ -134,7 +127,8 @@
     
     NSString *title = alert;
     NSString *detailButton = nil;
-    if (customData) {
+	
+	if (customData) {
         detailButton = @"Details";
     }
     
@@ -144,7 +138,6 @@
     }
     
     if (alert) {
-//        self.alertUserInfo = userInfo;
         UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
                                                             message:message
                                                            delegate:self
@@ -152,20 +145,9 @@
                                                   otherButtonTitles:detailButton, nil];
         [alertView show];
     }
-    
-//    if (customData) {
-//        [self sendResult:@{@"event": @"message", @"payload": userInfo} ];
-//    }
 }
 
-//- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
-//    if (buttonIndex == 1) {
-//        [self sendResult:@{@"event": @"interaction", @"payload": self.alertUserInfo} ];
-//        self.alertUserInfo = nil;
-//    }
-//}
-
-- (void) register: (NSString*)userIdentifier
+- (void)register:(NSString *)userIdentifier
 {
     _uniqueIdentifier = userIdentifier;
     UIApplication *application = [UIApplication sharedApplication];
