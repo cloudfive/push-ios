@@ -16,7 +16,6 @@
     Method originalDidRegisterForRemoteNotificationsWithDeviceToken;
     Method originalDidFailToRegisterForRemoteNotificationsWithError;
     NSString *_uniqueIdentifier;
-	BOOL didSwizzle;
 }
 
 @end
@@ -47,8 +46,6 @@
    
     [self replaceSelector:@selector(application:didRegisterForRemoteNotificationsWithDeviceToken:)];
     [self replaceSelector:@selector(application:didFailToRegisterForRemoteNotificationsWithError:)];
-	
-	didSwizzle = NO;
     [self replaceSelector:@selector(application:didReceiveRemoteNotification:)];
     
     return self;
