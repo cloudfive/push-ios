@@ -10,17 +10,14 @@
 #import <UIKit/UIKit.h>
 
 @interface CloudFivePush : NSObject <NSURLConnectionDataDelegate, UIAlertViewDelegate>
-+(void)configure;
-+(void)register;
-+(void)registerWithUserIdentifier:(NSString*)userIdentifier;
-+(void)notifyCloudFiveWithToken:(NSString*)apsToken uniqueIdentifier:(NSString*)uniqueIdentifier;
-//-(void)didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)token;
-//-(void)didFailToRegisterForRemoteNotificationsWithError:(NSError *)error;
-//-(void)didReceiveRemoteNotification:(NSDictionary *)userInfo;
 
++ (void)configure;
++ (void)register;
++ (void)registerWithUserIdentifier:(NSString *)userIdentifier;
++ (void)notifyCloudFiveWithToken:(NSString *)apsToken uniqueIdentifier:(NSString *)uniqueIdentifier;
 
+@property NSString *uniqueIdentifier;
+@property NSString *apsToken;
+@property NSDictionary *alertUserInfo;
 
-@property NSString* uniqueIdentifier;
-@property NSString* apsToken;
-@property NSDictionary* alertUserInfo;
 @end
