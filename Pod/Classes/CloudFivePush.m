@@ -21,12 +21,6 @@
 	return instance;
 }
 
-+ (void)load
-{
-	//instantiate the singleton which will swizzle a bunch of AppDelegate methods
-	[CloudFivePush sharedInstance];
-}
-
 + (void)register
 {
     [[CloudFivePush sharedInstance] register: nil];
@@ -58,7 +52,9 @@
 - (BOOL)replaceSelector:(SEL)selector
 {
     NSLog(@"Replacing selector %@", NSStringFromSelector(selector));
-	Class appDelegate = NSClassFromString(@"AppDelegate");
+    UIApplication *app = [UIApplication sharedApplication];
+    id delegate = [app delegate];
+    Class appDelegate = [delegate class];
 
 	Method originalMethod = class_getInstanceMethod(appDelegate, selector);
     BOOL appDidImplementMethod = YES;
