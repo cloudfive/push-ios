@@ -85,7 +85,7 @@
 	} else {
         NSLog(@"Something went terribly wrong, we couldn't add a method with a crazy name");
 	}
-  
+
 	return appDidImplementMethod;
 }
 
@@ -104,10 +104,10 @@
     NSString *apsToken = [[[[deviceToken description] stringByReplacingOccurrencesOfString:@"<" withString:@""]
                                                       stringByReplacingOccurrencesOfString:@">" withString:@""]
                                                       stringByReplacingOccurrencesOfString:@" " withString:@""];
-	
+
 
     [[CloudFivePush sharedInstance] notifyCloudFiveWithToken:apsToken];
-    
+
     SEL orig = [CloudFivePush origSelector:@selector(application:didRegisterForRemoteNotificationsWithDeviceToken:)];
     #pragma clang diagnostic push
     #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
@@ -124,7 +124,7 @@
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
 {
-    
+
 	// Get application state for iOS4.x+ devices, otherwise assume active
 	UIApplicationState appState = UIApplicationStateActive;
 	if ([application respondsToSelector:@selector(applicationState)]) {
@@ -145,9 +145,7 @@
         [[CloudFivePush sharedInstance] handleForegroundNotification:userInfo];
 	}
 
-	[[CloudFivePush sharedInstance] application:application didReceiveRemoteNotification:userInfo];
-    SEL orig = [CloudFivePush origSelector:@selector(application:didReceiveRemoteNotification:)];
-    
+	SEL orig = [CloudFivePush origSelector:@selector(application:didReceiveRemoteNotification:)];
     #pragma clang diagnostic push
     #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
     [self performSelector: orig withObject: application withObject: userInfo];
@@ -186,7 +184,7 @@
         UIUserNotificationSettings *settings = [UIUserNotificationSettings
                                                 settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeBadge|UIUserNotificationTypeSound
                                                 categories:nil];
-        
+
         [application registerUserNotificationSettings:settings ];
         [application registerForRemoteNotifications];
     } else {
@@ -208,12 +206,12 @@
                           dev.model,
                           dev.systemVersion,
                           [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString*)kCFBundleVersionKey]
-                          
+
                           ];
     if (_uniqueIdentifier != nil) {
         postData = [postData stringByAppendingFormat:@"&user_identifier=%@", _uniqueIdentifier];
     }
-    
+
     request.HTTPBody = [postData dataUsingEncoding:NSUTF8StringEncoding];
     NSURLConnection *conn = [NSURLConnection connectionWithRequest:request delegate:self];
     [conn start];
