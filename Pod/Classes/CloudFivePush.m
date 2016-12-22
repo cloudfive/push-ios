@@ -26,9 +26,19 @@
     [[CloudFivePush sharedInstance] register: nil];
 }
 
++ (void)unregister
+{
+    [[CloudFivePush sharedInstance] unregister: nil];
+}
+
 + (void)registerWithUserIdentifier:(NSString *)userIdentifier
 {
     [[CloudFivePush sharedInstance] register: userIdentifier];
+}
+
++ (void)unregisterWithUserIdentifier:(NSString *)userIdentifier
+{
+    [[CloudFivePush sharedInstance] unregister: userIdentifier];
 }
 
 // its dangerous to override a method from within a category.
@@ -192,6 +202,14 @@
     }
 }
 
+- (void)unregister:(NSString *)userIdentifier
+{
+    _uniqueIdentifier = userIdentifier;
+    UIApplication *application = [UIApplication sharedApplication];
+    [application unregisterForRemoteNotifications];
+    [[CloudFivePush sharedInstance] unregisterCloudFive: userIdentifier];
+}
+
 #pragma mark -
 - (void)notifyCloudFiveWithToken:(NSString *)apsToken
 {
@@ -202,6 +220,29 @@
     NSString *postData = [NSString stringWithFormat:@"bundle_identifier=%@&device_token=%@&device_platform=ios&device_name=%@&device_model=%@&device_version=%@&app_version=%@",
                           [[NSBundle mainBundle] bundleIdentifier],
                           apsToken,
+                          dev.name,
+                          dev.model,
+                          dev.systemVersion,
+                          [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString*)kCFBundleVersionKey]
+
+                          ];
+    if (_uniqueIdentifier != nil) {
+        postData = [postData stringByAppendingFormat:@"&user_identifier=%@", _uniqueIdentifier];
+    }
+
+    request.HTTPBody = [postData dataUsingEncoding:NSUTF8StringEncoding];
+    NSURLConnection *conn = [NSURLConnection connectionWithRequest:request delegate:self];
+    [conn start];
+}
+
+- (void)unregisterCloudFive
+{
+    NSLog(@"unregistering %@ from cloud five push", _uniqueIdentifier);
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://www.cloudfiveapp.com/push/unregister"]];
+    request.HTTPMethod = @"POST";
+    UIDevice *dev = [UIDevice currentDevice];
+    NSString *postData = [NSString stringWithFormat:@"bundle_identifier=%@&device_platform=ios&device_name=%@&device_model=%@&device_version=%@&app_version=%@",
+                          [[NSBundle mainBundle] bundleIdentifier],
                           dev.name,
                           dev.model,
                           dev.systemVersion,
