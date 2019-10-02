@@ -24,7 +24,7 @@ Coming soon.
 
 ## Requirements
 
-* iOS version must be at least 7
+* iOS version must be at least 8
 
 * You will need an account on [Cloud Five](http://push.cloudfiveapp.com) in order to send push notifications to the device.
 
