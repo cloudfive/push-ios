@@ -159,16 +159,12 @@
 - (void)register:(NSString *)userIdentifier {
     _uniqueIdentifier = userIdentifier;
     UIApplication *application = [UIApplication sharedApplication];
-    if ([application respondsToSelector:@selector(isRegisteredForRemoteNotifications)]) {
-        UIUserNotificationSettings *settings = [UIUserNotificationSettings
-                                                settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeBadge|UIUserNotificationTypeSound
-                                                categories:nil];
+    UIUserNotificationSettings *settings = [UIUserNotificationSettings
+                                            settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeBadge|UIUserNotificationTypeSound
+                                            categories:nil];
 
-        [application registerUserNotificationSettings:settings];
-        [application registerForRemoteNotifications];
-    } else {
-        [application registerForRemoteNotificationTypes:(UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound)];
-    }
+    [application registerUserNotificationSettings:settings];
+    [application registerForRemoteNotifications];
 }
 
 #pragma mark -
