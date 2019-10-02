@@ -53,7 +53,7 @@
 // in a method called cloudfive_orig_{selector}
 // Returns true if the app already implemented the method, false if we added it.
 - (BOOL)replaceSelector:(SEL)selector {
-    NSLog(@"Replacing selector %@", NSStringFromSelector(selector));
+    NSLog(@"Cloudfive: Replacing selector %@", NSStringFromSelector(selector));
     UIApplication *app = [UIApplication sharedApplication];
     id delegate = [app delegate];
     Class appDelegate = [delegate class];
@@ -61,12 +61,12 @@
     Method originalMethod = class_getInstanceMethod(appDelegate, selector);
     BOOL appDidImplementMethod = YES;
     if (originalMethod == NULL) {
-        NSLog(@"Creating method on appDelegate as noop instead");
+        NSLog(@"Cloudfive: Creating method on appDelegate as noop instead");
         appDidImplementMethod = NO;
         // they didn't declare the method so create it with our noop implementation
         void (^noopBlock)(id) = ^(id _self)
         {
-            NSLog(@"noop block");
+            NSLog(@"Cloudfive: noop block");
             return;
         };
         IMP noop_imp = imp_implementationWithBlock(noopBlock);
@@ -85,7 +85,7 @@
     if (didAddMethod) {
         method_exchangeImplementations(originalMethod, swizzledMethod);
     } else {
-        NSLog(@"Something went terribly wrong, we couldn't add a method with a crazy name");
+        NSLog(@"Cloudfive: Something went terribly wrong, we couldn't add a method with a crazy name");
     }
 
     return appDidImplementMethod;
@@ -104,10 +104,10 @@
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     NSUInteger length = deviceToken.length * 2;
     if (length == 0) {
-        NSLog(@"Device token is empty");
+        NSLog(@"Cloudfive: Device token is empty");
         return;
     }
-    NSLog(@"Got token: %@", deviceToken);
+    NSLog(@"Cloudfive: Got token: %@", deviceToken);
     const unsigned char *buffer = deviceToken.bytes;
     NSMutableString *apsToken = [NSMutableString stringWithCapacity:length];
     for (int i = 0; i < deviceToken.length; i++) {
@@ -125,7 +125,7 @@
 }
 
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
-    NSLog(@"Error registering for push: %@", [error localizedDescription]);
+    NSLog(@"Cloudfive: Error registering for push: %@", [error localizedDescription]);
     // TODO show an error message or something?
 }
 
@@ -141,6 +141,12 @@
         [[UIApplication sharedApplication] setApplicationIconBadgeNumber:[badge longValue]];
     } else {
         [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
+    }
+
+    // If we're in the foreground and the app dev didn't implement the receiveRemoteNotificaiton method
+    BOOL appImpl = [[CloudFivePush sharedInstance] appDidImplementSelector:@selector(application:didReceiveRemoteNotification:)];
+    if (!appImpl) {
+         NSLog(@"Cloudfive: Push received but didReceiveRemoteNotification was not implemented.");
     }
 
     SEL orig = [CloudFivePush origSelector:@selector(application:didReceiveRemoteNotification:)];
@@ -168,7 +174,7 @@
 #pragma mark -
 
 - (void)notifyCloudFiveWithToken:(NSString *)apsToken {
-    NSLog(@"notifying cloud five %@ has token %@", _uniqueIdentifier, apsToken);
+    NSLog(@"Cloudfive: notifying cloud five %@ has token %@", _uniqueIdentifier, apsToken);
 
     NSBundle *bundle = [NSBundle mainBundle];
     UIDevice *device = [UIDevice currentDevice];
@@ -193,7 +199,7 @@
 }
 
 - (void)unregister:(NSString *)userIdentifier {
-    NSLog(@"unregistering device");
+    NSLog(@"Cloudfive: unregistering device");
 
     NSBundle *bundle = [NSBundle mainBundle];
     UIDevice *device = [UIDevice currentDevice];
@@ -210,15 +216,15 @@
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    NSLog(@"Error talking to cloudfive");
+    NSLog(@"Cloudfive: Error talking to cloudfive");
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
     if ([httpResponse statusCode] == 200) {
-        NSLog(@"Successfully registered!");
+        NSLog(@"Cloudfive: Successfully registered!");
     } else {
-        NSLog(@"Couldn't register with cloudfive");
+        NSLog(@"Cloudfive: Couldn't register with cloudfive");
     }
 }
 

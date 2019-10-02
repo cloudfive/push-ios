@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "CloudFivePush"
-  s.version          = "0.11.0"
+  s.version          = "1.0.0"
   s.summary          = "iOS client library for receiving push notifications from cloudfiveapp.com."
   s.description      = <<-DESC
                        Easy push notifications via https://push.cloudfiveapp.com.  Just include this Pod in your iOS
