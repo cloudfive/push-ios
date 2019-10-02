@@ -102,13 +102,19 @@
 #pragma mark appDelegate methods
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+    NSUInteger length = deviceToken.length * 2;
+    if (length == 0) {
+        NSLog(@"Device token is empty");
+        return;
+    }
     NSLog(@"Got token: %@", deviceToken);
-    NSString *apsToken = [[[[deviceToken description] stringByReplacingOccurrencesOfString:@"<" withString:@""]
-                           stringByReplacingOccurrencesOfString:@">" withString:@""]
-                          stringByReplacingOccurrencesOfString:@" " withString:@""];
+    const unsigned char *buffer = deviceToken.bytes;
+    NSMutableString *apsToken = [NSMutableString stringWithCapacity:length];
+    for (int i = 0; i < deviceToken.length; i++) {
+        [apsToken appendFormat:@"%02x", buffer[i]];
+    }
 
-
-    [[CloudFivePush sharedInstance] notifyCloudFiveWithToken:apsToken];
+    [[CloudFivePush sharedInstance] notifyCloudFiveWithToken:[apsToken copy]];
 
     SEL orig = [CloudFivePush origSelector:@selector(application:didRegisterForRemoteNotificationsWithDeviceToken:)];
 #pragma clang diagnostic push
@@ -137,40 +143,11 @@
         [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
     }
 
-    // If we're in the foreground and the app dev didn't implement the receiveRemoteNotificaiton method,
-    // We show an alert by default so the notification isn't swallowed.
-    BOOL appImpl = [[CloudFivePush sharedInstance] appDidImplementSelector:@selector(application:didReceiveRemoteNotification:)];
-    if (appState == UIApplicationStateActive && !appImpl) {
-        [[CloudFivePush sharedInstance] handleForegroundNotification:userInfo];
-    }
-
     SEL orig = [CloudFivePush origSelector:@selector(application:didReceiveRemoteNotification:)];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
     [self performSelector: orig withObject: application withObject: userInfo];
 #pragma clang diagnostic pop
-}
-
-- (void)handleForegroundNotification:(NSDictionary *)userInfo {
-    NSDictionary *payload = [userInfo objectForKey:@"aps"];
-    NSString *message = [userInfo objectForKey:@"message"];
-    NSString *alert = [payload objectForKey:@"alert"];
-    if (!alert) {
-        return;
-    }
-    NSString *title = alert;
-
-    if (message == nil) {
-        title = [[[NSBundle mainBundle] infoDictionary]  objectForKey:@"CFBundleName"];
-        message = alert;
-    }
-
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title
-                                                        message:message
-                                                       delegate:self
-                                              cancelButtonTitle:@"Dismiss"
-                                              otherButtonTitles:nil];
-    [alertView show];
 }
 
 - (void)register:(NSString *)userIdentifier {
@@ -210,7 +187,7 @@
 
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://push.cloudfiveapp.com/push/register"]];
     request.HTTPMethod = @"POST";
-    request.HTTPBody = [postData dataUsingEncoding:NSUTF8StringEncoding];
+    request.HTTPBody = [[postData stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]] dataUsingEncoding:NSUTF8StringEncoding];
     NSURLConnection *conn = [NSURLConnection connectionWithRequest:request delegate:self];
     [conn start];
 }
@@ -220,14 +197,14 @@
 
     NSBundle *bundle = [NSBundle mainBundle];
     UIDevice *device = [UIDevice currentDevice];
-    NSString *postData = [NSString stringWithFormat:@"bundle_identifier=%@&device_platform=ios&app_version=%@&device_identifier=%@", bundle.bundleIdentifier, device.systemVersion, device.identifierForVendor.UUIDString];
+    NSString *postData = [NSString stringWithFormat:@"bundle_identifier=%@&device_platform=ios&device_identifier=%@", bundle.bundleIdentifier, device.identifierForVendor.UUIDString];
     if (userIdentifier != nil) {
         postData = [postData stringByAppendingFormat:@"&user_identifier=%@", userIdentifier];
     }
 
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://push.cloudfiveapp.com/push/unregister"]];
     request.HTTPMethod = @"POST";
-    request.HTTPBody = [postData dataUsingEncoding:NSUTF8StringEncoding];
+    request.HTTPBody = [[postData stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]] dataUsingEncoding:NSUTF8StringEncoding];
     NSURLConnection *conn = [NSURLConnection connectionWithRequest:request delegate:self];
     [conn start];
 }
