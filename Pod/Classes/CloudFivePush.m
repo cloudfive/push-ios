@@ -2,9 +2,15 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 
+typedef NS_ENUM(NSInteger, CloudFiveEnvironment) {
+    Production,
+    Dev
+};
+
 @interface CloudFivePush () {
     NSString *_uniqueIdentifier;
     NSDictionary *appImplementedSelectors;
+    CloudFiveEnvironment *_cloudFiveEnvironment;
 }
 
 @end
@@ -20,20 +26,20 @@
     return instance;
 }
 
-+ (void)register {
++ (void)registerForEnvironment:(CloudFiveEnvironment *)env {
     [[CloudFivePush sharedInstance] register:nil];
 }
 
-+ (void)registerWithUserIdentifier:(NSString *)userIdentifier {
++ (void)registerWithUserIdentifier:(NSString *)userIdentifier forEnvironment:(CloudFiveEnvironment *)env {
     [[CloudFivePush sharedInstance] register:userIdentifier];
 }
 
-+ (void)unregister {
-    [[CloudFivePush sharedInstance] unregister:nil];
++ (void)unregisterForEnvironment: (CloudFiveEnvironment *)env {
+    [[CloudFivePush sharedInstance] unregister:nil forEnvironment:env];
 }
 
-+ (void)unregisterWithUserIdentifier:(NSString *)userIdentifier {
-    [[CloudFivePush sharedInstance] unregister:userIdentifier];
++ (void)unregisterWithUserIdentifier:(NSString *)userIdentifier forEnvironment:(CloudFiveEnvironment *)env {
+    [[CloudFivePush sharedInstance] unregister:userIdentifier forEnvironment:env];
 }
 
 // its dangerous to override a method from within a category.
@@ -156,7 +162,8 @@
 #pragma clang diagnostic pop
 }
 
-- (void)register:(NSString *)userIdentifier {
+- (void)register:(NSString *)userIdentifier forEnvironment:(CloudFiveEnvironment *)environment {
+    _cloudFiveEnvironment = environment;
     _uniqueIdentifier = userIdentifier;
     UIApplication *application = [UIApplication sharedApplication];
     UIUserNotificationSettings *settings = [UIUserNotificationSettings
@@ -187,14 +194,15 @@
         postData = [postData stringByAppendingFormat:@"&user_identifier=%@", _uniqueIdentifier];
     }
 
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://push.cloudfiveapp.com/push/register"]];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"", [self baseURL], "register"]]];
     request.HTTPMethod = @"POST";
     request.HTTPBody = [[postData stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]] dataUsingEncoding:NSUTF8StringEncoding];
     NSURLConnection *conn = [NSURLConnection connectionWithRequest:request delegate:self];
     [conn start];
 }
 
-- (void)unregister:(NSString *)userIdentifier {
+- (void)unregister:(NSString *)userIdentifier forEnvironment:(CloudFiveEnvironment *)environment  {
+    _cloudFiveEnvironment = environment;
     NSLog(@"Cloudfive: unregistering device");
 
     NSBundle *bundle = [NSBundle mainBundle];
@@ -204,7 +212,7 @@
         postData = [postData stringByAppendingFormat:@"&user_identifier=%@", userIdentifier];
     }
 
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://push.cloudfiveapp.com/push/unregister"]];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"", [self baseURL], "unregister"]]];
     request.HTTPMethod = @"POST";
     request.HTTPBody = [[postData stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]] dataUsingEncoding:NSUTF8StringEncoding];
     NSURLConnection *conn = [NSURLConnection connectionWithRequest:request delegate:self];
@@ -221,6 +229,17 @@
         NSLog(@"Cloudfive: Successfully registered!");
     } else {
         NSLog(@"Cloudfive: Couldn't register with cloudfive");
+    }
+}
+
+- (NSString *)baseURL {
+    switch (_cloudFiveEnvironment) {
+        case .Production:
+            return "https://push.cloudfiveapp.com/push/";
+        case .Dev:
+            return "https://push-dev.10fw.net/push/";
+        default:
+            return "https://push.cloudfiveapp.com/push/"
     }
 }
 
