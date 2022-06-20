@@ -194,7 +194,7 @@ typedef NS_ENUM(NSInteger, CloudFiveEnvironment) {
         postData = [postData stringByAppendingFormat:@"&user_identifier=%@", _uniqueIdentifier];
     }
 
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"", [self baseURL], "register"]]];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", [self baseURL], @"register"]]];
     request.HTTPMethod = @"POST";
     request.HTTPBody = [[postData stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]] dataUsingEncoding:NSUTF8StringEncoding];
     NSURLConnection *conn = [NSURLConnection connectionWithRequest:request delegate:self];
@@ -212,7 +212,7 @@ typedef NS_ENUM(NSInteger, CloudFiveEnvironment) {
         postData = [postData stringByAppendingFormat:@"&user_identifier=%@", userIdentifier];
     }
 
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"", [self baseURL], "unregister"]]];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", [self baseURL], @"unregister"]]];
     request.HTTPMethod = @"POST";
     request.HTTPBody = [[postData stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]] dataUsingEncoding:NSUTF8StringEncoding];
     NSURLConnection *conn = [NSURLConnection connectionWithRequest:request delegate:self];
@@ -235,11 +235,11 @@ typedef NS_ENUM(NSInteger, CloudFiveEnvironment) {
 - (NSString *)baseURL {
     switch (_cloudFiveEnvironment) {
         case .Production:
-            return "https://push.cloudfiveapp.com/push/";
+            return @"https://push.cloudfiveapp.com/push/";
         case .Dev:
-            return "https://push-dev.10fw.net/push/";
+            return @"https://push-dev.10fw.net/push/";
         default:
-            return "https://push.cloudfiveapp.com/push/"
+            return @"https://push.cloudfiveapp.com/push/";
     }
 }
 
