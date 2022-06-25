@@ -1,16 +1,17 @@
 #import "CloudFivePush.h"
 #import <objc/runtime.h>
 #import <objc/message.h>
+#import <UIKit/UIKit.h>
 
 typedef NS_ENUM(NSInteger, CloudFiveEnvironment) {
-    Production,
-    Dev
+    Production = 0,
+    Dev = 1
 };
 
 @interface CloudFivePush () {
     NSString *_uniqueIdentifier;
     NSDictionary *appImplementedSelectors;
-    CloudFiveEnvironment *_cloudFiveEnvironment;
+    CloudFiveEnvironment _cloudFiveEnvironment;
 }
 
 @end
@@ -234,9 +235,9 @@ typedef NS_ENUM(NSInteger, CloudFiveEnvironment) {
 
 - (NSString *)baseURL {
     switch (_cloudFiveEnvironment) {
-        case .Production:
+        case Production:
             return @"https://push.cloudfiveapp.com/push/";
-        case .Dev:
+        case Dev:
             return @"https://push-dev.10fw.net/push/";
         default:
             return @"https://push.cloudfiveapp.com/push/";
