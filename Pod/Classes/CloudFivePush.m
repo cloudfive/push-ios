@@ -1,17 +1,7 @@
-#import "CloudFivePush.h"
-#import <objc/runtime.h>
-#import <objc/message.h>
-#import <UIKit/UIKit.h>
-
-typedef NS_ENUM(NSInteger, CloudFiveEnvironment) {
-    Production = 0,
-    Dev = 1
-};
-
 @interface CloudFivePush () {
     NSString *_uniqueIdentifier;
     NSDictionary *appImplementedSelectors;
-    CloudFiveEnvironment _cloudFiveEnvironment;
+    BOOL devMode;
 }
 
 @end
@@ -27,20 +17,24 @@ typedef NS_ENUM(NSInteger, CloudFiveEnvironment) {
     return instance;
 }
 
-+ (void)registerForEnvironment:(CloudFiveEnvironment *)env {
++ (void)register {
     [[CloudFivePush sharedInstance] register:nil];
 }
 
-+ (void)registerWithUserIdentifier:(NSString *)userIdentifier forEnvironment:(CloudFiveEnvironment *)env {
++ (void)registerWithUserIdentifier:(NSString *)userIdentifier {
     [[CloudFivePush sharedInstance] register:userIdentifier];
 }
 
-+ (void)unregisterForEnvironment: (CloudFiveEnvironment *)env {
-    [[CloudFivePush sharedInstance] unregister:nil forEnvironment:env];
++ (void)unregister {
+    [[CloudFivePush sharedInstance] unregister:nil];
 }
 
-+ (void)unregisterWithUserIdentifier:(NSString *)userIdentifier forEnvironment:(CloudFiveEnvironment *)env {
-    [[CloudFivePush sharedInstance] unregister:userIdentifier forEnvironment:env];
++ (void)unregisterWithUserIdentifier:(NSString *)userIdentifier {
+    [[CloudFivePush sharedInstance] unregister:userIdentifier];
+}
+
++ (void)enableDevMode {
+    [[CloudFivePush sharedInstance] enableDevMode];
 }
 
 // its dangerous to override a method from within a category.
@@ -48,12 +42,17 @@ typedef NS_ENUM(NSInteger, CloudFiveEnvironment) {
 - (id)init {
     _uniqueIdentifier = nil;
     appImplementedSelectors = [[NSMutableDictionary alloc] init];
+    devMode = NO;
 
     [self replaceSelector:@selector(application:didRegisterForRemoteNotificationsWithDeviceToken:)];
     [self replaceSelector:@selector(application:didFailToRegisterForRemoteNotificationsWithError:)];
     [self replaceSelector:@selector(application:didReceiveRemoteNotification:)];
 
     return self;
+}
+
+- (void)enableDevMode {
+    devMode = YES;
 }
 
 // Replace a selector on appDelegate with the equivalently named selector here, and put the original
@@ -163,8 +162,7 @@ typedef NS_ENUM(NSInteger, CloudFiveEnvironment) {
 #pragma clang diagnostic pop
 }
 
-- (void)register:(NSString *)userIdentifier forEnvironment:(CloudFiveEnvironment *)environment {
-    _cloudFiveEnvironment = environment;
+- (void)register:(NSString *)userIdentifier {
     _uniqueIdentifier = userIdentifier;
     UIApplication *application = [UIApplication sharedApplication];
     UIUserNotificationSettings *settings = [UIUserNotificationSettings
@@ -195,15 +193,20 @@ typedef NS_ENUM(NSInteger, CloudFiveEnvironment) {
         postData = [postData stringByAppendingFormat:@"&user_identifier=%@", _uniqueIdentifier];
     }
 
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", [self baseURL], @"register"]]];
+    NSURL *url = [NSURL URLWithString:@"https://push.cloudfiveapp.com/push/register"];
+    
+    if (devMode) {
+        url = [NSURL URLWithString:@"https://cloudfive.10fw.net/push/register"];
+    }
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     request.HTTPMethod = @"POST";
     request.HTTPBody = [[postData stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]] dataUsingEncoding:NSUTF8StringEncoding];
     NSURLConnection *conn = [NSURLConnection connectionWithRequest:request delegate:self];
     [conn start];
 }
 
-- (void)unregister:(NSString *)userIdentifier forEnvironment:(CloudFiveEnvironment *)environment  {
-    _cloudFiveEnvironment = environment;
+- (void)unregister:(NSString *)userIdentifier {
     NSLog(@"Cloudfive: unregistering device");
 
     NSBundle *bundle = [NSBundle mainBundle];
@@ -213,7 +216,7 @@ typedef NS_ENUM(NSInteger, CloudFiveEnvironment) {
         postData = [postData stringByAppendingFormat:@"&user_identifier=%@", userIdentifier];
     }
 
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", [self baseURL], @"unregister"]]];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://push.cloudfiveapp.com/push/unregister"]];
     request.HTTPMethod = @"POST";
     request.HTTPBody = [[postData stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]] dataUsingEncoding:NSUTF8StringEncoding];
     NSURLConnection *conn = [NSURLConnection connectionWithRequest:request delegate:self];
@@ -233,15 +236,5 @@ typedef NS_ENUM(NSInteger, CloudFiveEnvironment) {
     }
 }
 
-- (NSString *)baseURL {
-    switch (_cloudFiveEnvironment) {
-        case Production:
-            return @"https://push.cloudfiveapp.com/push/";
-        case Dev:
-            return @"https://push-dev.10fw.net/push/";
-        default:
-            return @"https://push.cloudfiveapp.com/push/";
-    }
-}
 
 @end
