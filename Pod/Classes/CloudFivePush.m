@@ -5,6 +5,7 @@
 @interface CloudFivePush () {
     NSString *_uniqueIdentifier;
     NSDictionary *appImplementedSelectors;
+    BOOL devMode;
 }
 
 @end
@@ -36,17 +37,26 @@
     [[CloudFivePush sharedInstance] unregister:userIdentifier];
 }
 
++ (void)enableDevMode {
+    [[CloudFivePush sharedInstance] enableDevMode];
+}
+
 // its dangerous to override a method from within a category.
 // Instead we will use method swizzling. we set this up in the load call.
 - (id)init {
     _uniqueIdentifier = nil;
     appImplementedSelectors = [[NSMutableDictionary alloc] init];
+    devMode = NO;
 
     [self replaceSelector:@selector(application:didRegisterForRemoteNotificationsWithDeviceToken:)];
     [self replaceSelector:@selector(application:didFailToRegisterForRemoteNotificationsWithError:)];
     [self replaceSelector:@selector(application:didReceiveRemoteNotification:)];
 
     return self;
+}
+
+- (void)enableDevMode {
+    devMode = YES;
 }
 
 // Replace a selector on appDelegate with the equivalently named selector here, and put the original
@@ -187,7 +197,13 @@
         postData = [postData stringByAppendingFormat:@"&user_identifier=%@", _uniqueIdentifier];
     }
 
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"https://push.cloudfiveapp.com/push/register"]];
+    NSURL *url = [NSURL URLWithString:@"https://push.cloudfiveapp.com/push/register"];
+    
+    if (devMode) {
+        url = [NSURL URLWithString:@"https://cloudfive.10fw.net/push/register"];
+    }
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     request.HTTPMethod = @"POST";
     request.HTTPBody = [[postData stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]] dataUsingEncoding:NSUTF8StringEncoding];
     NSURLConnection *conn = [NSURLConnection connectionWithRequest:request delegate:self];
@@ -223,5 +239,6 @@
         NSLog(@"Cloudfive: Couldn't register with cloudfive");
     }
 }
+
 
 @end
