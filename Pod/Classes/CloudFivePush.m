@@ -1,3 +1,7 @@
+#import "CloudFivePush.h"
+#import <objc/runtime.h>
+#import <objc/message.h>
+
 @interface CloudFivePush () {
     NSString *_uniqueIdentifier;
     NSDictionary *appImplementedSelectors;
